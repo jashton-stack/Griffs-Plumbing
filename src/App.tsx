@@ -114,8 +114,8 @@ const ExternalLink = ({ size = 16, color = "currentColor" }: IconProps) => (
 );
 
 /* ─── SCROLL ANIMATION HOOK ──────────────────────────────────── */
-function useInView(threshold = 0.15): [React.RefObject<HTMLDivElement | null>, boolean] {
-  const ref = useRef<HTMLDivElement | null>(null);
+function useInView(threshold = 0.15): [React.RefObject<HTMLDivElement>, boolean] {
+  const ref = useRef<HTMLDivElement>(null!);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const el = ref.current;
@@ -132,7 +132,7 @@ function useInView(threshold = 0.15): [React.RefObject<HTMLDivElement | null>, b
 
 const FadeIn = ({ children, delay = 0, direction = "up", className = "" }: { children: ReactNode; delay?: number; direction?: string; className?: string }) => {
   const [ref, visible] = useInView();
-  const transforms = { up: "translateY(32px)", down: "translateY(-32px)", left: "translateX(32px)", right: "translateX(-32px)", none: "none" };
+  const transforms: Record<string, string> = { up: "translateY(32px)", down: "translateY(-32px)", left: "translateX(32px)", right: "translateX(-32px)", none: "none" };
   return (
     <div ref={ref} className={className} style={{
       opacity: visible ? 1 : 0,
@@ -325,7 +325,7 @@ const Header = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const headerStyle = {
+  const headerStyle: React.CSSProperties = {
     position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
     background: scrolled ? `${T.colors.white}f8` : "transparent",
     backdropFilter: scrolled ? "blur(16px)" : "none",
@@ -340,7 +340,6 @@ const Header = () => {
         <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           {/* Logo area */}
           <a href="#" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            {/* Logo placeholder - replace with actual logo img tag in production */}
             <div style={{
               width: 160, height: 50, 
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -660,7 +659,7 @@ const Reviews = () => (
             Our customers rate us highly on Facebook for reliable service, fair pricing, and expert workmanship. We'd love for you to check out our reviews and share your experience too.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 16 }}>
-            <a
+            
               href="https://www.facebook.com/227410830745499"
               target="_blank"
               rel="noopener noreferrer"
@@ -668,7 +667,7 @@ const Reviews = () => (
             >
               Read Our Facebook Reviews <ExternalLink size={16} />
             </a>
-            <a
+            
               href="https://www.google.com/search?q=Griff%27s+Plumbing+Omaha+NE+reviews"
               target="_blank"
               rel="noopener noreferrer"
@@ -775,7 +774,7 @@ const FAQ = () => (
   </section>
 );
 
-/* ─── BOOKING SECTION (Calendar Embed Placeholder) ───────────── */
+/* ─── BOOKING SECTION (Calendar Embed) ───────────────────────── */
 const Booking = () => (
   <section id="booking" className="section-pad" style={{
     background: `linear-gradient(135deg, ${T.colors.steelDk} 0%, ${T.colors.blueDk} 100%)`,
@@ -873,16 +872,14 @@ const Contact = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // ── PHASE 2: Paste your GHL webhook URL here ──────────────
   const GHL_WEBHOOK_URL = "https://services.leadconnectorhq.com/hooks/G4czjmTJMsJplz32hwTf/webhook-trigger/KBH3vFbFTPtyHMbR8s1h";
-  // ──────────────────────────────────────────────────────────
 
   // Capture UTMs from URL on mount
   const utmRef = useRef<Record<string, string>>({});
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const utmKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"];
-    utmKeys.forEach(k => { if (params.get(k)) utmRef.current[k] = params.get(k); });
+    utmKeys.forEach(k => { const v = params.get(k); if (v) utmRef.current[k] = v; });
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -891,7 +888,6 @@ const Contact = () => {
     setError("");
 
     if (GHL_WEBHOOK_URL.startsWith("PASTE")) {
-      // Fallback while webhook isn't configured yet
       console.log("Form data (webhook not configured):", formData, utmRef.current);
       setSubmitted(true);
       setSubmitting(false);
